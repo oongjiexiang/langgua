@@ -1,48 +1,112 @@
-import Link from 'next/link'
-import './globals.css'
-import { Inter } from 'next/font/google'
-import { AppRouterCacheProvider } from '@mui/material-nextjs/v14-appRouter';
-import '@fontsource/roboto/300.css';
-import '@fontsource/roboto/400.css';
-import '@fontsource/roboto/500.css';
-import '@fontsource/roboto/700.css';
-
-const inter = Inter({ subsets: ['latin'] })
+import * as React from 'react';
+import Link from 'next/link';
+import AppBar from '@mui/material/AppBar';
+import Box from '@mui/material/Box';
+import Drawer from '@mui/material/Drawer';
+import Toolbar from '@mui/material/Toolbar';
+import Typography from '@mui/material/Typography';
+import Divider from '@mui/material/Divider';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemButton from '@mui/material/ListItemButton';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
+import DashboardIcon from '@mui/icons-material/Dashboard';
+import HomeIcon from '@mui/icons-material/Home';
+import StarIcon from '@mui/icons-material/Star';
+import ChecklistIcon from '@mui/icons-material/Checklist';
+import SettingsIcon from '@mui/icons-material/Settings';
+import SupportIcon from '@mui/icons-material/Support';
+import LogoutIcon from '@mui/icons-material/Logout';
+import ThemeRegistry from '@/components/ThemeRegistry/ThemeRegistry';
 
 export const metadata = {
   title: 'Langgua',
   description: "Pinch every interviewer's heart with the right words",
-}
+};
 
-const links = [
-  { href: '/', label: 'Home' },
-  { href: '/resume', label: 'View Resume' },
-  { href: '/build', label: 'Build Profile' },
-]
+const DRAWER_WIDTH = 240;
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+const LINKS = [
+  { text: 'Home', href: '/', icon: HomeIcon },
+  { text: 'Build Profile', href: '/starred', icon: StarIcon },
+  { text: 'View Resumes', href: '/tasks', icon: ChecklistIcon },
+];
+
+const PLACEHOLDER_LINKS = [
+  { text: 'Settings', icon: SettingsIcon },
+  { text: 'Logout', icon: LogoutIcon },
+];
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className={inter.className}>
-        <AppRouterCacheProvider options={{ enableCssLayer: true }}>
-          <header>
-          <nav>
-            <ul className="flex justify-end items-center">
-              {links.map((link) => (
-                <li key={link.href}>
-                  <Link href={link.href} className="px-2 rounded-md">{link.label}</Link>
-                </li>
+      <body>
+        <ThemeRegistry>
+          <AppBar position="fixed" sx={{ zIndex: 2000 }}>
+            <Toolbar sx={{ backgroundColor: 'background.paper' }}>
+              <DashboardIcon sx={{ color: '#444', mr: 2, transform: 'translateY(-2px)' }} />
+              <Typography variant="h6" color="text.primary">
+                Langgua
+              </Typography>
+            </Toolbar>
+          </AppBar>
+          <Drawer
+            sx={{
+              width: DRAWER_WIDTH,
+              flexShrink: 0,
+              '& .MuiDrawer-paper': {
+                width: DRAWER_WIDTH,
+                boxSizing: 'border-box',
+                top: ['48px', '56px', '64px'],
+                height: 'auto',
+                bottom: 0,
+              },
+            }}
+            variant="permanent"
+            anchor="left"
+          >
+            <Divider />
+            <List>
+              {LINKS.map(({ text, href, icon: Icon }) => (
+                <ListItem key={href} disablePadding>
+                  <ListItemButton component={Link} href={href}>
+                    <ListItemIcon>
+                      <Icon />
+                    </ListItemIcon>
+                    <ListItemText primary={text} />
+                  </ListItemButton>
+                </ListItem>
               ))}
-            </ul>
-          </nav>
-        </header>
-        </AppRouterCacheProvider>
-        {children}
+            </List>
+            <Divider sx={{ mt: 'auto' }} />
+            <List>
+              {PLACEHOLDER_LINKS.map(({ text, icon: Icon }) => (
+                <ListItem key={text} disablePadding>
+                  <ListItemButton>
+                    <ListItemIcon>
+                      <Icon />
+                    </ListItemIcon>
+                    <ListItemText primary={text} />
+                  </ListItemButton>
+                </ListItem>
+              ))}
+            </List>
+          </Drawer>
+          <Box
+            component="main"
+            sx={{
+              flexGrow: 1,
+              bgcolor: 'background.default',
+              ml: `${DRAWER_WIDTH}px`,
+              mt: ['48px', '56px', '64px'],
+              p: 3,
+            }}
+          >
+            {children}
+          </Box>
+        </ThemeRegistry>
       </body>
     </html>
-  )
+  );
 }
