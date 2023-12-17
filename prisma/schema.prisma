@@ -1,0 +1,260 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Field {
+  id               Int                @id @default(autoincrement())
+  name             String
+  code             String
+  skill            Skill[]
+  experiences      Experience[]
+  project          Project[]
+  education        Education[]
+  externalActivity ExternalActivity[]
+  job              Job[]
+  resumeGroup      ResumeGroup[]
+}
+
+model Skill {
+  id              Int                       @id @default(autoincrement())
+  name            String
+  field           Field                     @relation(fields: [fieldId], references: [id])
+  fieldId         Int
+  accomplishments SkillsOnAccomplishments[]
+}
+
+model JobType {
+  id          Int          @id @default(autoincrement())
+  name        String
+  experiences Experience[]
+}
+
+model Location {
+  id               Int                @id @default(autoincrement())
+  country          String
+  building         String
+  experiences      Experience[]
+  project          Project[]
+  education        Education[]
+  externalActivity ExternalActivity[]
+}
+
+model Experience {
+  id              Int              @id @default(autoincrement())
+  location        Location         @relation(fields: [locationId], references: [id])
+  locationId      Int
+  jobType         JobType          @relation(fields: [jobTypeId], references: [id])
+  jobTypeId       Int
+  field           Field            @relation(fields: [fieldId], references: [id])
+  fieldId         Int
+  priority        Int
+  startDate       DateTime
+  endDate         DateTime
+  link            Hyperlink[]
+  accomplishments Accomplishment[]
+  sectionMask     SectionMask[]
+}
+
+model Accomplishment {
+  id               Int                       @id @default(autoincrement())
+  experience       Experience?               @relation(fields: [experienceId], references: [id])
+  externalActiivty ExternalActivity?         @relation(fields: [experienceId], references: [id])
+  experienceId     Int
+  experienceType   String
+  action           String
+  result           String
+  description      String
+  skills           SkillsOnAccomplishments[]
+  project          Project?                  @relation(fields: [projectId], references: [id])
+  projectId        Int?
+  subsectionMask   SubsectionMask[]
+}
+
+model SkillsOnAccomplishments {
+  skill            Skill          @relation(fields: [skillId], references: [id])
+  skillId          Int
+  accomplishment   Accomplishment @relation(fields: [accomplishmentId], references: [id])
+  accomplishmentId Int
+
+  @@id([skillId, accomplishmentId])
+}
+
+model Project {
+  id              Int              @id @default(autoincrement())
+  location        Location         @relation(fields: [locationId], references: [id])
+  locationId      Int
+  field           Field            @relation(fields: [fieldId], references: [id])
+  fieldId         Int
+  priority        Int
+  startDate       DateTime
+  endDate         DateTime
+  link            Hyperlink[]
+  accomplishments Accomplishment[]
+  sectionMask     SectionMask[]
+}
+
+model Award {
+  id             Int              @id @default(autoincrement())
+  name           String
+  awardedDate    DateTime
+  description    String
+  education      Education        @relation(fields: [educationId], references: [id])
+  educationId    Int
+  subsectionMask SubsectionMask[]
+}
+
+model Achievement {
+  id             Int              @id @default(autoincrement())
+  name           String
+  link           String
+  issuer         String
+  description    String
+  education      Education        @relation(fields: [educationId], references: [id])
+  educationId    Int
+  subsectionMask SubsectionMask[]
+}
+
+model Education {
+  id           Int           @id @default(autoincrement())
+  location     Location      @relation(fields: [locationId], references: [id])
+  locationId   Int
+  field        Field         @relation(fields: [fieldId], references: [id])
+  fieldId      Int
+  priority     Int
+  startDate    DateTime
+  endDate      DateTime
+  link         Hyperlink[]
+  awards       Award[]
+  achievements Achievement[]
+  sectionMask  SectionMask[]
+}
+
+model ExternalActivity {
+  id              Int              @id @default(autoincrement())
+  location        Location         @relation(fields: [locationId], references: [id])
+  locationId      Int
+  field           Field            @relation(fields: [fieldId], references: [id])
+  fieldId         Int
+  priority        Int
+  startDate       DateTime
+  endDate         DateTime
+  link            Hyperlink[]
+  accomplishments Accomplishment[]
+  sectionMask     SectionMask[]
+}
+
+model Profile {
+  id            Int           @id @default(autoincrement())
+  firstName     String
+  lastName      String
+  email         Email[]
+  website       Hyperlink[]
+  contactNumber String?
+  sectionMask   SectionMask[]
+}
+
+model Email {
+  email     String  @unique
+  profile   Profile @relation(fields: [profileId], references: [id])
+  profileId Int
+}
+
+model Hyperlink {
+  id                   Int               @id @default(autoincrement())
+  name                 String
+  link                 String
+  experience           Experience?       @relation(fields: [linkedObjectId], references: [id])
+  externalActivity     ExternalActivity? @relation(fields: [linkedObjectId], references: [id])
+  project              Project?          @relation(fields: [linkedObjectId], references: [id])
+  education            Education?        @relation(fields: [linkedObjectId], references: [id])
+  profile              Profile?          @relation(fields: [linkedObjectId], references: [id])
+  linkedObjectId       Int
+  linkedObjectTypeName String
+}
+
+model Job {
+  id       Int    @id @default(autoincrement())
+  title    String
+  field    Field  @relation(fields: [fieldId], references: [id])
+  fieldId  Int
+  resume   Resume @relation(fields: [resumeId], references: [id])
+  resumeId Int
+}
+
+model ResumeGroup {
+  id      Int      @id @default(autoincrement())
+  name    String   @unique
+  field   Field    @relation(fields: [fieldId], references: [id])
+  fieldId Int
+  Resume  Resume[]
+}
+
+model Resume {
+  id                  Int                   @id @default(autoincrement())
+  name                String // the filename
+  tag                 String                @unique
+  resumeGroup         ResumeGroup           @relation(fields: [resumeGroupId], references: [id])
+  resumeGroupId       Int
+  job                 Job[]
+  sectionMaskOnResume SectionMaskOnResume[]
+}
+
+model SubsectionMask {
+  id          Int    @id @default(autoincrement())
+  tag         String @unique
+  description String
+
+  accomplishment Accomplishment? @relation(fields: [linkedObjectId], references: [id])
+  achievement    Achievement?    @relation(fields: [linkedObjectId], references: [id])
+  award          Award?          @relation(fields: [linkedObjectId], references: [id])
+
+  linkedObjectId       Int
+  linkedObjectTypeName String
+
+  propertyToChange            String                        @default("description")
+  propertyNewValue            String
+  subsectionMaskOnSectionMask SubsectionMaskOnSectionMask[]
+}
+
+model SectionMask {
+  id          Int    @id @default(autoincrement())
+  tag         String @unique
+  description String
+
+  experience       Experience?       @relation(fields: [linkedObjectId], references: [id])
+  project          Project?          @relation(fields: [linkedObjectId], references: [id])
+  education        Education?        @relation(fields: [linkedObjectId], references: [id])
+  externalActivity ExternalActivity? @relation(fields: [linkedObjectId], references: [id])
+  profile          Profile?          @relation(fields: [linkedObjectId], references: [id])
+
+  linkedObjectId              Int
+  linkedObjectType            String
+  subsectionMaskOnSectionMask SubsectionMaskOnSectionMask[]
+  sectionMaskOnResume         SectionMaskOnResume[]
+}
+
+model SubsectionMaskOnSectionMask {
+  sectionMask      SectionMask    @relation(fields: [sectionMaskId], references: [id])
+  sectionMaskId    Int
+  subsectionMask   SubsectionMask @relation(fields: [subsectionMaskId], references: [id])
+  subsectionMaskId Int
+
+  @@id([sectionMaskId, subsectionMaskId])
+}
+
+model SectionMaskOnResume {
+  sectionMask   SectionMask @relation(fields: [sectionMaskId], references: [id])
+  sectionMaskId Int
+  resume        Resume      @relation(fields: [resumeId], references: [id])
+  resumeId      Int
+
+  @@id([resumeId, sectionMaskId])
+}
