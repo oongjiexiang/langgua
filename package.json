@@ -15,7 +15,7 @@
     "@fontsource/roboto": "^5.0.8",
     "@mui/icons-material": "^5.15.0",
     "@mui/material-nextjs": "^5.15.0",
-    "@prisma/client": "^5.7.0",
+    "@prisma/client": "^5.7.1",
     "@types/mongoose": "^5.11.97",
     "mongoose": "^8.0.3",
     "next": "14.0.4",

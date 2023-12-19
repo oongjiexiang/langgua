@@ -1,4 +1,6 @@
 import Box from '@mui/material/Box';
+import { SubmitButton } from './SubmitButton';
+import { createProfile } from '@/utils/actions';
 
 export default function StoryForm({ children }: { children: any }) {
     return (
@@ -7,10 +9,10 @@ export default function StoryForm({ children }: { children: any }) {
             sx={{
                 '& > :not(style)': { m: 1 },
             }}
-            noValidate
-            autoComplete="off"
+            action={createProfile}
         >
             {children}
+            <SubmitButton />
         </Box>
     )
 }
